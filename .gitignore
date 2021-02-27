@@ -48,3 +48,13 @@ Thumbs.db
 *.mov
 *.wmv
 
+/Loops/build/
+/Loops/nbproject/private/
+/Day001Loops/build/
+/Day001Loops/nbproject/private/
+/IfElseSwitch/nbproject/private/
+/Day002SwitchIfElse/nbproject/private/
+/Day002People/nbproject/private/
+/Day002People/build/
+/Day002Todos/nbproject/private/
+/Day002Todos/build/
