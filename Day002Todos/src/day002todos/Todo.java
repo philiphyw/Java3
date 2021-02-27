@@ -4,6 +4,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Todo {
 
@@ -32,6 +34,22 @@ public class Todo {
         this.setHoursOfWork(hoursOfWork);
         this.setStatus(status);
     }
+    
+        // a constructor to splite dataline and build a new todo
+    public Todo(String dataLine) throws InvalidDataException {
+        String[] data = dataLine.split(";");
+        this.setTask(data[0]);
+        this.setDueDate(data[1]);
+        this.setHoursOfWork(data[2]);
+        if(data[3].equals("0")  || data[3].isEmpty()){
+            this.setStatus("pending");
+        }else if(data[3].equals("1") ){
+            this.setStatus("done");
+        }else{
+            throw new InvalidDataException("Failed to create new todo, the status ordinal data in dataLine must be 0 or 1");
+        }
+        
+    }
 
     public String getTask() {
         return task;
@@ -39,14 +57,16 @@ public class Todo {
 
     public void setTask(String task) throws InvalidDataException {
         // 2-50 characters long, must NOT contain a semicolon or | or ` (reverse single quote) characters
-        if (task.length() <= 1 || task.length() > 50 || task.contains(";") || task.contains("`")) {
-            throw new InvalidDataException("task must contain 2 - 50 characters and must NOT contain a ; (semicolon) or ` (reverse single quote)");
+        if (task.length() <= 1 || task.length() > 50 || task.contains(";") || task.contains("|") || task.contains("`")) {
+            throw new InvalidDataException("task must contain 2 - 50 characters and must NOT contain a ; (semicolon) or |  or ` (reverse single quote)");
         }
         this.task = task;
     }
 
-    public Date getDueDate() {
-        return dueDate;
+    public String getDueDate() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy/mm/dd") ;
+        String formattedDate = df.format(this.dueDate);
+        return formattedDate;
     }
 
     public void setDueDate(String dueDate) throws InvalidDataException {
@@ -67,7 +87,7 @@ public class Todo {
 
     }
 
-    public int getHoursOfWork() throws InvalidDataException {
+    public int getHoursOfWork() {
         return hoursOfWork;
     }
 
@@ -122,9 +142,13 @@ public class Todo {
 
     @Override
     public String toString() {
+        return String.format("%s, %s, will take %d hour(s) of work, %s\n", this.getTask(),this.getDueDate(), this.getHoursOfWork(), this.status.toString());
+    }
+    
+        public String toDataString() {
         SimpleDateFormat df = new SimpleDateFormat("yyyy/mm/dd") ;
         String formattedDate = df.format(this.dueDate);
-        return String.format("%s, %s, will take %d hour(s) of work, %s\n", this.task,formattedDate, this.hoursOfWork, this.status.toString());
+        return String.join(";",this.getTask(),this.getDueDate(),String.valueOf(this.getHoursOfWork()),String.valueOf(this.getStatus().ordinal()));
     }
 
 }

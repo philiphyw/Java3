@@ -1,0 +1,4 @@
+buy some milk;2021/12/03;2;0
+buy some bread;2021/04/04;2;0
+buy a plane;2012/03/04;24;0
+Buy a train agian;2013/04/12;20;1
