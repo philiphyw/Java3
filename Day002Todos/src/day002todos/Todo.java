@@ -3,6 +3,7 @@ package day002todos;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,12 +15,18 @@ public class Todo {
     private int hoursOfWork;
     private TaskStatus status;
 
-    static enum TaskStatus {
+    enum TaskStatus {
         Pending, Done
     }
-
+    
+    private static final SimpleDateFormat dateFormatFile;
+    static {
+        dateFormatFile = new SimpleDateFormat("yyyy-mm-dd");
+       dateFormatFile.setLenient(false);
+    }
+    
     // a constructor for new created todo
-    public Todo(String task, String dueDate, int hoursOfWork) throws InvalidDataException {
+    public Todo(String task, Date dueDate, int hoursOfWork) throws InvalidDataException {
         this.setTask(task);
         this.setDueDate(dueDate);
         this.setHoursOfWork(hoursOfWork);
@@ -28,7 +35,7 @@ public class Todo {
     }
 
     // a constructor for modified todo
-    public Todo(String task, String dueDate, int hoursOfWork, String status) throws InvalidDataException {
+    public Todo(String task, Date dueDate, int hoursOfWork, String status) throws InvalidDataException {
         this.setTask(task);
         this.setDueDate(dueDate);
         this.setHoursOfWork(hoursOfWork);
@@ -36,10 +43,10 @@ public class Todo {
     }
     
         // a constructor to splite dataline and build a new todo
-    public Todo(String dataLine) throws InvalidDataException {
+    public Todo(String dataLine) throws ParseException, InvalidDataException {
         String[] data = dataLine.split(";");
         this.setTask(data[0]);
-        this.setDueDate(data[1]);
+        this.setDueDate(dateFormatFile.parse(data[1]));
         this.setHoursOfWork(data[2]);
         if(data[3].equals("0")  || data[3].isEmpty()){
             this.setStatus("pending");
@@ -63,28 +70,20 @@ public class Todo {
         this.task = task;
     }
 
-    public String getDueDate() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy/mm/dd") ;
-        String formattedDate = df.format(this.dueDate);
-        return formattedDate;
+    public Date getDueDate() {
+        return this.dueDate;
     }
 
-    public void setDueDate(String dueDate) throws InvalidDataException {
+    public void setDueDate(Date dueDate) throws InvalidDataException {
         // Use SimpleDateFormat to parse String to Date
-        DateFormat df = new SimpleDateFormat("yyyy/mm/dd");
-        Date tempDate = null;
-        try {
-            tempDate = df.parse(dueDate);
-            // Date between year 1900 and 2100
-            int yearOfDue = Integer.parseInt(dueDate.substring(0, 4));
-            if (yearOfDue < 1900 || yearOfDue > 2100) {
-                throw new InvalidDataException("The year of dueDate must between year 1900 and 2100");
-            }
-            this.dueDate = tempDate;
-        } catch (ParseException e) {
-            throw new InvalidDataException("Incorrect date format, the dueDate must be entered in the format 'yyyy/mm/dd'");
+        
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dueDate);
+        int year = cal.get(Calendar.YEAR);
+        if (year <1900 || year > 2100) {
+            throw new InvalidDataException("Year must be 1900 to 2100");
         }
-
+        this.dueDate = dueDate;
     }
 
     public int getHoursOfWork() {
@@ -146,9 +145,8 @@ public class Todo {
     }
     
         public String toDataString() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy/mm/dd") ;
-        String formattedDate = df.format(this.dueDate);
-        return String.join(";",this.getTask(),this.getDueDate(),String.valueOf(this.getHoursOfWork()),String.valueOf(this.getStatus().ordinal()));
+        String dueDateStr = dateFormatFile.format(dueDate);
+        return String.join(";",this.getTask(),dueDateStr,String.valueOf(this.getHoursOfWork()),String.valueOf(this.getStatus().ordinal()));
     }
 
 }

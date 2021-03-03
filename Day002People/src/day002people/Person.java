@@ -10,7 +10,9 @@ public class Person {
     private String name;
     private int age;
     
-    Person(String name, int age) throws InvalidDataException{
+    public Person(){};
+    
+    public Person(String name, int age) throws InvalidDataException{
     this.setName(name);
     this.setAge(age);
         
