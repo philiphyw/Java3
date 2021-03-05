@@ -1,0 +1,5 @@
+zcvxc;18 - 35;Dogs;Europe;23
+Jim;18 - 35;Others;North America;29
+Kim;below 18;Cats;Europe;20
+Sunny;36 and up;Cats;Asia;26
+Sandy;36 and up;Cats,Dogs,Others;Europe;17

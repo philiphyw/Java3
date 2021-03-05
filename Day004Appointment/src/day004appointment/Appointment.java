@@ -68,10 +68,7 @@ public class Appointment {
         }
 
     }
-    catch (ParseException | IndexOutOfBoundsException e
-
-    
-        ) {
+    catch (ParseException | IndexOutOfBoundsException e) {
             throw new DataInvalidException("Incorrect date or int in source file: " + dataString);
     }
 }
