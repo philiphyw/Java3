@@ -247,15 +247,18 @@ public class Day006ManyInput extends javax.swing.JFrame {
 
         if (cbCat.isSelected()) {
             petList.add(cbCat.getActionCommand());
-        }
-
-        if (cbDog.isSelected()) {
+        }else if (cbDog.isSelected()) {
             petList.add(cbDog.getActionCommand());
-        }
-
-        if (cbOther.isSelected()) {
+        }else if (cbOther.isSelected()) {
             petList.add(cbOther.getActionCommand());
-        }
+        }else{
+            //Should never happen, except adding new radio button to the button group
+            JOptionPane.showMessageDialog(this, 
+                    "Invalid control flow 100034", 
+                    "Internal Error",
+                  JOptionPane.ERROR_MESSAGE
+            );
+        }    
 
         StringJoiner sj = new StringJoiner(",");//no space before/after the comma, to avoid error while importing a dataString in the future ;
         for (int i = 0; i < petList.size(); i++) {
