@@ -1,9 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+//Tech Tags: JFileChooser, File Chooser, DocumentListener, Document Listener
 package day007notepad;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.IIOException;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.Document;
 
 /**
  *
@@ -11,11 +24,92 @@ package day007notepad;
  */
 public class Day007NotePad extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Day007NotePad
-     */
+    final JFileChooser fc = new JFileChooser();
+    boolean hasModified = true;
+    private String currentFile;
+
+    private void initFileChooser() {
+
+        //Set the fc selection mode, there're 3 modes:FILES_ONLY,DIRECTORIES_ONLY, FILES_AND_DIRECTORIES
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        //Disable the Accept all filter to limit user can only choose .txt files
+        fc.setAcceptAllFileFilterUsed(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        fc.setFileFilter(filter);
+        fc.setCurrentDirectory(new File(".\\"));
+
+    }
+
+    //instead of directly tracking the change on the taDocument component, should add a DocumentListener to it for easy tracking.
+    private void initDocumentListerner() {
+        taDocument.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                hasModified = true;
+                lblStatus.setText("Inserting...");
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                hasModified = true;
+                lblStatus.setText("Removing");
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                //plain text like txt won't trigger this event.
+            }
+        });
+
+    }
+
+    private String getFileName() {
+        //Show dialog and create new file
+        int returnVal = fc.showSaveDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            String fileName = fc.getSelectedFile().getName();
+
+            //check if user has input a file name, if NOT, abort the create new file process
+            if (fileName == null) {
+                lblStatus.setText("Cancel file creation");
+                return "";
+            }
+
+            //check if user input file name has the ".txt" extension, if NOT, then add the .txt extension at the end of the file name
+            if (fileName.length() <= 5 || !fileName.substring(fileName.length() - 4, fileName.length()).toLowerCase().equals(".txt")) {
+                //may need to find out if it's worthy to use a new String Builder here         
+                fileName += ".txt";
+            }
+            return fileName;
+        }
+        return "";
+    }
+
+    private void writeDataToFile(String fileName) {
+
+        //need to add code to verify if the file exists in current folder
+        //if it exists, ask user to choose another name, abort the create new file process
+        try (PrintWriter pw = new PrintWriter(new File(fileName))) {
+
+            //Check it there's any content to write, if yes, write to the file
+            String content = taDocument.getText();
+            if (content != null) {
+                pw.println(content);
+            }
+            currentFile = fileName;
+            this.setTitle(currentFile);
+            hasModified = false;
+        } catch (FileNotFoundException ex) {
+            lblStatus.setText("Failed to create the file");
+        }
+    }
+
     public Day007NotePad() {
         initComponents();
+        initFileChooser();
+        initDocumentListerner();
+
     }
 
     /**
@@ -33,7 +127,7 @@ public class Day007NotePad extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         taDocument = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
-        mbFile = new javax.swing.JMenu();
+        mbFileExit = new javax.swing.JMenu();
         miFileNew = new javax.swing.JMenuItem();
         miFileOpen = new javax.swing.JMenuItem();
         miFileSave = new javax.swing.JMenuItem();
@@ -56,16 +150,31 @@ public class Day007NotePad extends javax.swing.JFrame {
 
         getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-        mbFile.setText("File");
+        mbFileExit.setText("File");
 
         miFileNew.setText("New");
-        mbFile.add(miFileNew);
+        miFileNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miFileNewActionPerformed(evt);
+            }
+        });
+        mbFileExit.add(miFileNew);
 
         miFileOpen.setText("Open...");
-        mbFile.add(miFileOpen);
+        miFileOpen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miFileOpenActionPerformed(evt);
+            }
+        });
+        mbFileExit.add(miFileOpen);
 
         miFileSave.setText("Save");
-        mbFile.add(miFileSave);
+        miFileSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miFileSaveActionPerformed(evt);
+            }
+        });
+        mbFileExit.add(miFileSave);
 
         miFileSaveAs.setText("Save As...");
         miFileSaveAs.addActionListener(new java.awt.event.ActionListener() {
@@ -73,13 +182,18 @@ public class Day007NotePad extends javax.swing.JFrame {
                 miFileSaveAsActionPerformed(evt);
             }
         });
-        mbFile.add(miFileSaveAs);
-        mbFile.add(jSeparator1);
+        mbFileExit.add(miFileSaveAs);
+        mbFileExit.add(jSeparator1);
 
         miFileExit.setText("Exit");
-        mbFile.add(miFileExit);
+        miFileExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miFileExitActionPerformed(evt);
+            }
+        });
+        mbFileExit.add(miFileExit);
 
-        jMenuBar1.add(mbFile);
+        jMenuBar1.add(mbFileExit);
 
         setJMenuBar(jMenuBar1);
 
@@ -89,7 +203,80 @@ public class Day007NotePad extends javax.swing.JFrame {
 
     private void miFileSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFileSaveAsActionPerformed
         // TODO add your handling code here:
+        String fileName = getFileName();
+        writeDataToFile(fileName);
+
     }//GEN-LAST:event_miFileSaveAsActionPerformed
+
+
+    private void miFileOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFileOpenActionPerformed
+        // TODO add your handling code here:
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            //taDocument.setText(fc.getSelectedFile().getAbsolutePath());
+            File file = fc.getSelectedFile();
+            StringBuilder sbContent = new StringBuilder();
+
+            try (Scanner inputFile = new Scanner(file)) {
+                while (inputFile.hasNextLine()) {
+                    String line = inputFile.nextLine();
+                    sbContent.append(line + "\n");
+                }
+                String content = sbContent.toString();
+                taDocument.setText(content);
+                currentFile = file.getName();
+                this.setTitle(currentFile);
+            } catch (FileNotFoundException ex) {
+                lblStatus.setText("File not found");
+            }
+        }
+    }//GEN-LAST:event_miFileOpenActionPerformed
+
+    private void miFileNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFileNewActionPerformed
+        // TODO add your handling code here:
+        String fileName = getFileName();
+        writeDataToFile(fileName);
+    }//GEN-LAST:event_miFileNewActionPerformed
+
+    private void miFileExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFileExitActionPerformed
+        // TODO add your handling code here:
+        if (hasModified == true) {
+            int returnVal = JOptionPane.showConfirmDialog(this, "Do you want to save the change?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);//yes:0, No:1
+            switch (returnVal) {
+                case 2:
+                    return;
+                case 1:
+                    this.dispose();
+                    break;
+                case 0:
+                    if (currentFile != null) {
+                        String fileName = currentFile;
+                        writeDataToFile(fileName);
+                    } else {
+                        String fileName = getFileName();
+                        writeDataToFile(fileName);
+                    }
+                    this.dispose();
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            this.dispose();
+        }
+
+    }//GEN-LAST:event_miFileExitActionPerformed
+
+    private void miFileSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFileSaveActionPerformed
+        // TODO add your handling code here:
+        if (currentFile != null) {
+            String fileName = currentFile;
+            writeDataToFile(fileName);
+        } else {
+            String fileName = getFileName();
+            writeDataToFile(fileName);
+        }
+    }//GEN-LAST:event_miFileSaveActionPerformed
 
     /**
      * @param args the command line arguments
@@ -108,13 +295,17 @@ public class Day007NotePad extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Day007NotePad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Day007NotePad.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Day007NotePad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Day007NotePad.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Day007NotePad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Day007NotePad.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Day007NotePad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Day007NotePad.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -132,7 +323,7 @@ public class Day007NotePad extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JMenu mbFile;
+    private javax.swing.JMenu mbFileExit;
     private javax.swing.JButton miFile;
     private javax.swing.JMenuItem miFileExit;
     private javax.swing.JMenuItem miFileNew;
