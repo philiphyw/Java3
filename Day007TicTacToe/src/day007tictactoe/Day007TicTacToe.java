@@ -52,12 +52,24 @@ public class Day007TicTacToe extends javax.swing.JFrame {
 
     private String getWinner() {
         //no winner in round 1 -4
-        if (gameDataMap.size() < 5) {
-            return "";
-        } else {
+
 
             //criteria 1: for any column, its row 0,1,2 have the same player
-
+             for (int i = 0; i < 3; i++) {
+                 String player1 = gameDataMap.get(i+"1");
+                 String player2 = gameDataMap.get(i+"2");
+                 String player3 = gameDataMap.get(i+"3");
+                 
+                 if (player1 == null || player2 == null || player3 == null ) {
+                     break;
+                 }else{
+                 
+                     if (player1.equals(player2)&&player1.equals(player3)) {
+                         return player1;
+                     }   
+                 }     
+            }
+             
             
 
             //criteria 2: for any row, its column 0,1,2 have the same player   
@@ -71,7 +83,7 @@ public class Day007TicTacToe extends javax.swing.JFrame {
 
             //if none of above creiteria is met, return empty string "";
             return "";
-        }
+        
     }
 
     private void setActionCommands() {

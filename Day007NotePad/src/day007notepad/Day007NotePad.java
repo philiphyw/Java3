@@ -77,6 +77,7 @@ public class Day007NotePad extends javax.swing.JFrame {
             }
 
             //check if user input file name has the ".txt" extension, if NOT, then add the .txt extension at the end of the file name
+            //or just use regex expression: if(fileName.matches(".*\\.[^.]{1,10}"))  -- start with a "." follow by anything but not inc
             if (fileName.length() <= 5 || !fileName.substring(fileName.length() - 4, fileName.length()).toLowerCase().equals(".txt")) {
                 //may need to find out if it's worthy to use a new String Builder here         
                 fileName += ".txt";

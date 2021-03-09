@@ -58,6 +58,8 @@ public class Day007FlavourList extends javax.swing.JFrame {
         jScrollPane2.setViewportView(lstFla1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setUndecorated(true);
+        setPreferredSize(new java.awt.Dimension(720, 480));
         setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Sitka Banner", 2, 36)); // NOI18N
