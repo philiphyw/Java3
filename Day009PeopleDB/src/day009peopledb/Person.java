@@ -23,12 +23,7 @@ public class Person {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Person{id=").append(id);
-        sb.append(", name=").append(name);
-        sb.append(", age=").append(age);
-        sb.append('}');
-        return sb.toString();
+       return String.format("id:%d;name:%s;age:%d", id,name,age);
     }
     
     

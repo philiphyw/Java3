@@ -1,6 +1,7 @@
 //Tech: Jframe, MySQL, GUI Database
 package day009peopledb;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
@@ -14,6 +15,7 @@ public class Day009PeopleDB extends javax.swing.JFrame {
 
     DefaultListModel<Person> peopleListModel = new DefaultListModel<>();
     Database db;
+    Person selectedPerson;
 
     private void reloadDatabase() {
         try {
@@ -38,10 +40,106 @@ public class Day009PeopleDB extends javax.swing.JFrame {
 
     }
 
+    private void addPersonToDatabase() {
+        try {
+            //get name from tfName and validate
+            String name = tfName.getText();
+            if (name.length() <= 2 || name.length() > 45) {
+                JOptionPane.showMessageDialog(this,
+                        "Name must be 2 - 45 characters",
+                        "Invalid data",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            
+            
+            
+            //get age from spAge and validate
+            int age = (int) spAge.getValue();
+            if (name.length() <= 1 || name.length() > 150) {
+                JOptionPane.showMessageDialog(this,
+                        "Age must be 1 - 150 ",
+                        "Invalid data",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            //Create new Person instance
+            Person person = new Person(0, name, age);
+            db.AddPerson(person);
+
+            //reload database to show result on the lstPerson
+            reloadDatabase();
+
+            //reset user input fields for new record
+            tfName.setText("");
+            spAge.setValue(18);
+
+            lblStatus.setText("Added new record: " + name + "," + age);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Failed to add data " + e.getMessage(),
+                    "Error in adding",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void UpdatePersonInDatabase() {
+
+        try{
+            int id = selectedPerson.id;
+            
+            //get name from tfName and validate
+            String name = tfName.getText();
+            if (name.length() <= 2 || name.length() > 45) {
+                JOptionPane.showMessageDialog(this,
+                        "Name must be 2 - 45 characters",
+                        "Invalid data",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            //get age from spAge and validate
+            int age = (int) spAge.getValue();
+            if (name.length() <= 1 || name.length() > 150) {
+                JOptionPane.showMessageDialog(this,
+                        "Age must be 1 - 150 ",
+                        "Invalid data",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+           
+           
+
+            Person updatedPerson = new Person(id,name,age);
+            db.UpdatePerson(updatedPerson);
+            
+            
+        }catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Failed to connect " + e.getMessage(),
+                    "Database error",
+                    JOptionPane.ERROR_MESSAGE);
+            System.exit(1); //FATAL ERROR, EXIT PROGRAM
+
+        }
+
+        }
+    
+    
+    
+
+    
+
     public Day009PeopleDB() {
         try {
             initComponents();
             db = new Database();
+            reloadDatabase();
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
@@ -74,12 +172,18 @@ public class Day009PeopleDB extends javax.swing.JFrame {
         btUpdatePerson = new javax.swing.JButton();
         btDeletePerson = new javax.swing.JButton();
         btAddPerson3 = new javax.swing.JButton();
+        lblStatus = new javax.swing.JLabel();
 
         btAddPerson1.setText("Add Person");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         lstPeople.setModel(peopleListModel);
+        lstPeople.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                lstPeopleValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(lstPeople);
 
         jLabel1.setText("ID:");
@@ -93,10 +197,22 @@ public class Day009PeopleDB extends javax.swing.JFrame {
         spAge.setModel(new javax.swing.SpinnerNumberModel(18, 1, 150, 1));
 
         btUpdatePerson.setText("Update Person");
+        btUpdatePerson.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btUpdatePersonActionPerformed(evt);
+            }
+        });
 
         btDeletePerson.setText("Delete Person");
 
         btAddPerson3.setText("Add Person");
+        btAddPerson3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAddPerson3ActionPerformed(evt);
+            }
+        });
+
+        lblStatus.setText("...");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -104,27 +220,30 @@ public class Day009PeopleDB extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btDeletePerson, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(lblId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(tfName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(spAge)))
-                        .addComponent(btAddPerson3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btUpdatePerson, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(145, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(28, 28, 28)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btDeletePerson, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(lblId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(tfName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(spAge)))
+                            .addComponent(btAddPerson3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btUpdatePerson, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 43, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -150,11 +269,36 @@ public class Day009PeopleDB extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btDeletePerson))
                     .addComponent(jScrollPane1))
-                .addContainerGap(102, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 77, Short.MAX_VALUE)
+                .addComponent(lblStatus)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btAddPerson3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAddPerson3ActionPerformed
+        // TODO add your handling code here:
+        addPersonToDatabase();
+    }//GEN-LAST:event_btAddPerson3ActionPerformed
+
+    private void btUpdatePersonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btUpdatePersonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btUpdatePersonActionPerformed
+
+    private void lstPeopleValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstPeopleValueChanged
+        // TODO add your handling code here:
+       selectedPerson = lstPeople.getSelectedValue();
+        if (selectedPerson==null) {
+            lblStatus.setText("No person is selected");
+        return;
+        }
+       lblId.setText(String.valueOf(selectedPerson.id));
+       tfName.setText(String.valueOf(selectedPerson.name));
+       spAge.setValue(selectedPerson.age);
+       
+       
+    }//GEN-LAST:event_lstPeopleValueChanged
 
     /**
      * @param args the command line arguments
@@ -202,6 +346,7 @@ public class Day009PeopleDB extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblId;
+    private javax.swing.JLabel lblStatus;
     private javax.swing.JList<Person> lstPeople;
     private javax.swing.JSpinner spAge;
     private javax.swing.JTextField tfName;

@@ -53,4 +53,16 @@ public class Database {
     }
     
     
+        public void UpdatePerson(Person person)throws SQLException{
+         //Update , ALWAYS includes a WHERE on udpate or delete statement
+            String sql = "UPDATE people SET name = ?, age =? WHERE id =?";
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, person.name);
+            statement.setInt(2, person.age);
+            statement.setInt(3, person.id);
+            statement.executeUpdate();     
+        
+    }
+    
+    
 }
